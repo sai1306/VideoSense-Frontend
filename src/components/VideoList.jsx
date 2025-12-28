@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import api from "../api/axios";
 import VideoPlayer from "./VideoPlayer";
 import { io } from "socket.io-client";
+import { useAuth } from "../context/AuthContext";
 
 const SOCKET_URL = "http://localhost:4000";
 
 export default function VideoList({ refresh }) {
+  const { user } = useAuth();
   const [videos, setVideos] = useState([]);
   const [selectedVideo, setSelectedVideo] = useState(null);
 
@@ -67,6 +69,17 @@ export default function VideoList({ refresh }) {
       setVideos(res.data);
     } catch (err) {
       console.error("Failed to fetch videos", err);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this video?")) return;
+    try {
+      await api.delete(`/api/videos/${id}`);
+      fetchVideos();
+    } catch (err) {
+      console.error("Failed to delete video", err);
+      alert(err.response?.data?.message || "Failed to delete video");
     }
   };
 
@@ -256,13 +269,24 @@ export default function VideoList({ refresh }) {
                   <span className="text-xs text-gray-500">{new Date(video.createdAt).toLocaleDateString()}</span>
 
                   {video.status === 'completed' && (
-                    <button
-                      style={{ backgroundColor: "#422ad5", color: "white" }}
-                      className="btn p-4 btn-sm btn-primary"
-                      onClick={() => setSelectedVideo(video._id)}
-                    >
-                      Play
-                    </button>
+                    <div className="flex gap-2">
+                      {/* Show Delete button if Admin OR Owner (Owner must not be Reader strictly, but backend also checks role) */}
+                      {(user?.role === 'admin' || (video.uploader?._id === user?._id || video.uploader === user?._id)) && (
+                        <button
+                          className="btn btn-sm btn-outline btn-error"
+                          onClick={() => handleDelete(video._id)}
+                        >
+                          Delete
+                        </button>
+                      )}
+                      <button
+                        style={{ backgroundColor: "#422ad5", color: "white" }}
+                        className="btn p-4 btn-sm btn-primary"
+                        onClick={() => setSelectedVideo(video._id)}
+                      >
+                        Play
+                      </button>
+                    </div>
                   )}
                 </div>
               </div>
