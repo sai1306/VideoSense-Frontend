@@ -4,6 +4,7 @@ import VideoPlayer from "./VideoPlayer";
 import { io } from "socket.io-client";
 import { useAuth } from "../context/AuthContext";
 
+// const SOCKET_URL = "https://videosense-backend.onrender.com";
 const SOCKET_URL = "http://localhost:4000";
 
 export default function VideoList({ refresh }) {
@@ -29,7 +30,7 @@ export default function VideoList({ refresh }) {
   }, [refresh, filters]); // Re-fetch when filters change
 
   // Socket listener for real-time updates
-  useEffect(() => {
+  useEffect(() => {   
     const socket = io(SOCKET_URL);
 
     socket.on("video_processing_update", (data) => {
@@ -47,7 +48,7 @@ export default function VideoList({ refresh }) {
         )
       );
 
-      // If a new video has just started processing but isn't in our list yet (rare race condition but possible if list fetched before processing start), 
+      // If a new video has just started processing but isn't in our list yet (rare condition but possible if list fetched before processing start), 
       // we might want to refetch, but typically we handle that with 'refresh' prop from parent.
     });
 
@@ -260,7 +261,7 @@ export default function VideoList({ refresh }) {
                 {/* Progress Bar & Message for Processing Videos */}
                 {video.status === 'processing' && (
                   <div className="mt-2 text-center">
-                    <progress className="progress progress-primary w-full" value={video.processingProgress || 0} max="100"></progress>
+                    <progress className="progress progress-primary w-full" value={video.processingProgress || 0} max="100">{video.processingProgress || 0}%</progress>
                     <p className="text-xs text-info mt-1 animate-pulse">{video.message || "Processing..."}</p>
                   </div>
                 )}

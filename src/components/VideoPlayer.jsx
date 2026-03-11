@@ -5,6 +5,7 @@ const VideoPlayer = ({ id }) => {
     <div className="w-full aspect-video bg-black rounded-lg overflow-hidden shadow-lg">
       <video className="w-full h-full" controls autoPlay>
         <source
+          // src={`https://videosense-backend.onrender.com/api/videos/stream/${id}?token=${token}`}
           src={`http://localhost:4000/api/videos/stream/${id}?token=${token}`}
           type="video/mp4"
         />
